@@ -2,18 +2,87 @@
 
 declare(strict_types=1);
 
+require __DIR__ . "/config.php";
+require __DIR__ . "/lib.php";
 
 $argv = $_SERVER["argv"];
+
+/* validate local config file */
+if (!file_exists(LOCAL_CONFIG_FILE)) {
+	if (!file_put_contents(LOCAL_CONFIG_FILE , json_encode((object) [
+		"paths" => [],
+		"pull" => []
+	]))) {
+		echo ERROR . "failed to create local config file\n";
+		exit(1);
+	}
+} else {
+	if (!is_file(LOCAL_CONFIG_FILE) || !is_readable(LOCAL_CONFIG_FILE)) {
+		echo ERROR . "cannot read local config file\n";
+		exit(1);
+	}
+}
+/* load local config */
+$config_json = file_get_contents(LOCAL_CONFIG_FILE);
+if ($config_json == FALSE) {
+	echo ERROR . "failed to read config file\n";
+	exit(1);
+}
+$CONFIG = json_decode($config_json);
+if ($CONFIG === NULL || !is_array($CONFIG)) {
+	echo ERROR . "invalid local config file\n";
+	exit(1);
+}
+
 
 if (!isset($argv[1])) {
 	print_help();
 	exit(1);
 }
 
-
-
-function print_help():void {
-
+/* actions */
+if ($argv[1] === "pull") {
+	if (!isset($CONFIG->pull) || count($CONFIG->pull) < 1) {
+		echo ERROR . "no paths to pull configured\n";
+		exit(1);
+	}
+	$password = "";
+	$errormsg = "";
+	cli_prompt_password("password: " , $password , $errormsg);
+	foreach ($CONFIG->pull as $pull) {
+		if (
+			!is_object($pull) ||
+			!isset($pull->path) || !is_string($pull->path) || $pull->path == "" ||
+			(isset($pull->branches) && !is_array($pull->branches))
+		) {
+			echo ERROR . "invalid pull spec\n";
+			exit(1);
+		}
+		if (!file_exists($pull->path) || !is_dir($pull->path)) {
+			echo ERROR . "directory not found: " . $pull->path . "\n";
+			exit(1);
+		}
+		if(!chdir($pull->path)) {
+			echo ERROR . "failed to cd to " . $Pull->path . "\n";
+			ext(1);
+		}
+		echo "\n" . $pull->path . "\n";
+		if (!isset($pull->branches)) {
+			$output = [];
+			if (exec("exec git pull" , $output , $exitcode) === FALSE) {
+				echo ERROR . "failed to execute git command\n";
+				continue;
+			}
+			echo implode("\n" , $output) . "\n";
+			if ($exitcode !== 0) {
+				echo ERROR . "";
+			}
+		}
+	}
+	
+} else {
+	print_help();
+	exit(1);
 }
 
 
