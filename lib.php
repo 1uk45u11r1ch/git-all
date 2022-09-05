@@ -175,7 +175,9 @@ function cli_prompt_password_verify(string $prompt = "" , string $verify_prompt 
 }
 
 function print_help() {
-	
+	echo "commands:\n";
+	echo "\n";
+	echo "\tpull\n";
 }
 
 ?>

@@ -14,13 +14,24 @@ $STATE = (object) [
 	]
 ];
 
-register_shutdown_function(function() {
+function shutdown() {
 	global $STATE;
+	global $password;
+	if (isset($password)) {
+		sodium_memzero($password);
+	}
 	if ($STATE->console->_win_obscureprompt_status === TRUE) {
 		echo "\033[0m";
 		cli_clear_screen();
 	}
-});
+	exit(0);
+}
+
+if (PHP_OS === "Linux") {
+	pcntl_signal(SIGINT , "shutdown");
+} else {
+	sapi_windows_set_ctrl_handler("shutdown");
+}
 
 
 ?>

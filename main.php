@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 require __DIR__ . "/config.php";
 require __DIR__ . "/lib.php";
+require __DIR__ . "/git.php";
 
 $argv = $_SERVER["argv"];
 
 /* validate local config file */
 if (!file_exists(LOCAL_CONFIG_FILE)) {
-	if (!file_put_contents(LOCAL_CONFIG_FILE , json_encode((object) [
-		"paths" => [],
+	if (!file_put_contents(LOCAL_CONFIG_FILE , str_replace("    " , "\t" , json_encode((object) [
 		"pull" => []
-	]))) {
+	] , JSON_PRETTY_PRINT)))) {
 		echo ERROR . "failed to create local config file\n";
 		exit(1);
 	}
@@ -29,7 +29,7 @@ if ($config_json == FALSE) {
 	exit(1);
 }
 $CONFIG = json_decode($config_json);
-if ($CONFIG === NULL || !is_array($CONFIG)) {
+if ($CONFIG === NULL || !is_object($CONFIG)) {
 	echo ERROR . "invalid local config file\n";
 	exit(1);
 }
@@ -56,26 +56,31 @@ if ($argv[1] === "pull") {
 			(isset($pull->branches) && !is_array($pull->branches))
 		) {
 			echo ERROR . "invalid pull spec\n";
+			sodium_memzero($password);
 			exit(1);
 		}
 		if (!file_exists($pull->path) || !is_dir($pull->path)) {
 			echo ERROR . "directory not found: " . $pull->path . "\n";
+			sodium_memzero($password);
 			exit(1);
 		}
 		if(!chdir($pull->path)) {
 			echo ERROR . "failed to cd to " . $Pull->path . "\n";
+			sodium_memzero($password);
 			ext(1);
 		}
 		echo "\n" . $pull->path . "\n";
-		if (!isset($pull->branches)) {
-			$output = [];
-			if (exec("exec git pull" , $output , $exitcode) === FALSE) {
-				echo ERROR . "failed to execute git command\n";
-				continue;
-			}
-			echo implode("\n" , $output) . "\n";
-			if ($exitcode !== 0) {
-				echo ERROR . "";
+		if (!isset($pull->branches) || count($pull->branches) < 1) {
+			/* pull branch that is currently checked out */
+			git_pull($password);
+		} else {
+			foreach ($pull->branches as $branch) {
+				if ($branch == "") {
+					echo ERROR . "empty branch name\n";
+					continue;
+				}
+				git_checkout($branch);
+				git_pull($password);
 			}
 		}
 	}
