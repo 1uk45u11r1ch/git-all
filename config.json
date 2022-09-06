@@ -1,15 +1,15 @@
 {
 	"pull": [
 		{
-			"path": "Z:\\Lukas\\Programmieren\\_Projekte\\git-all\\git-all\\test\\PasswordManager",
+			"path": "C:\\Users\\Lukas\\Documents\\_programming\\_test\\PasswordManager",
 			"branches": [
 				"main"
 			]
 		},
 		{
-			"path": "Z:\\Lukas\\Programmieren\\_Projekte\\git-all\\git-all\\test\\PasswordManager",
+			"path": "C:\\Users\\Lukas\\Documents\\_programming\\_test\\socket_tests",
 			"branches": [
-				"custom"
+				"main"
 			]
 		}
 	]

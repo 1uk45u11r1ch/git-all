@@ -72,15 +72,21 @@ if ($argv[1] === "pull") {
 		echo "\n" . $pull->path . "\n";
 		if (!isset($pull->branches) || count($pull->branches) < 1) {
 			/* pull branch that is currently checked out */
-			git_pull($password);
+			if (!git_pull($password)) {
+				exit(1);
+			}
 		} else {
 			foreach ($pull->branches as $branch) {
 				if ($branch == "") {
 					echo ERROR . "empty branch name\n";
 					continue;
 				}
-				git_checkout($branch);
-				git_pull($password);
+				if (!git_checkout($branch)) {
+					exit(1);
+				}
+				if (git_pull($password)) {
+					exit(1);
+				}
 			}
 		}
 	}
