@@ -67,12 +67,13 @@ if ($argv[1] === "pull") {
 		if(!chdir($pull->path)) {
 			echo ERROR . "failed to cd to " . $Pull->path . "\n";
 			sodium_memzero($password);
-			ext(1);
+			exit(1);
 		}
 		echo "\n" . $pull->path . "\n";
 		if (!isset($pull->branches) || count($pull->branches) < 1) {
 			/* pull branch that is currently checked out */
 			if (!git_pull($password)) {
+				sodium_memzero($password);
 				exit(1);
 			}
 		} else {
@@ -82,9 +83,11 @@ if ($argv[1] === "pull") {
 					continue;
 				}
 				if (!git_checkout($branch)) {
+					sodium_memzero($password);
 					exit(1);
 				}
 				if (!git_pull($password)) {
+					sodium_memzero($password);
 					exit(1);
 				}
 			}
