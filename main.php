@@ -84,7 +84,7 @@ if ($argv[1] === "pull") {
 				if (!git_checkout($branch)) {
 					exit(1);
 				}
-				if (git_pull($password)) {
+				if (!git_pull($password)) {
 					exit(1);
 				}
 			}
