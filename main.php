@@ -45,9 +45,6 @@ if ($argv[1] === "pull") {
 		echo ERROR . "no paths to pull configured\n";
 		exit(1);
 	}
-	$password = "";
-	$errormsg = "";
-	cli_prompt_password("password: " , $password , $errormsg);
 	foreach ($CONFIG->pull as $pull) {
 		if (
 			!is_object($pull) ||
