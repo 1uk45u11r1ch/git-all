@@ -69,6 +69,7 @@ if ($argv[1] === "pull") {
 				exit(1);
 			}
 		} else {
+			echo "\n";
 			foreach ($pull->branches as $branch) {
 				if ($branch == "") {
 					echo ERROR . "empty branch name\n";
@@ -81,6 +82,7 @@ if ($argv[1] === "pull") {
 				if (!git_pull()) {
 					exit(1);
 				}
+				echo "\n";
 			}
 		}
 	}
