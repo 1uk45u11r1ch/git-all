@@ -77,6 +77,7 @@ if ($argv[1] === "pull") {
 				if (!git_checkout($branch)) {
 					exit(1);
 				}
+				echo "\n";
 				if (!git_pull()) {
 					exit(1);
 				}
