@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 require __DIR__ . "/config.php";
-require __DIR__ . "/lib.php";
 require __DIR__ . "/git.php";
 
 $argv = $_SERVER["argv"];
@@ -46,9 +45,6 @@ if ($argv[1] === "pull") {
 		echo ERROR . "no paths to pull configured\n";
 		exit(1);
 	}
-	$password = "";
-	$errormsg = "";
-	cli_prompt_password("password: " , $password , $errormsg);
 	foreach ($CONFIG->pull as $pull) {
 		if (
 			!is_object($pull) ||
@@ -56,31 +52,34 @@ if ($argv[1] === "pull") {
 			(isset($pull->branches) && !is_array($pull->branches))
 		) {
 			echo ERROR . "invalid pull spec\n";
-			sodium_memzero($password);
 			exit(1);
 		}
 		if (!file_exists($pull->path) || !is_dir($pull->path)) {
 			echo ERROR . "directory not found: " . $pull->path . "\n";
-			sodium_memzero($password);
 			exit(1);
 		}
 		if(!chdir($pull->path)) {
 			echo ERROR . "failed to cd to " . $Pull->path . "\n";
-			sodium_memzero($password);
-			ext(1);
+			exit(1);
 		}
 		echo "\n" . $pull->path . "\n";
 		if (!isset($pull->branches) || count($pull->branches) < 1) {
 			/* pull branch that is currently checked out */
-			git_pull($password);
+			if (!git_pull()) {
+				exit(1);
+			}
 		} else {
 			foreach ($pull->branches as $branch) {
 				if ($branch == "") {
 					echo ERROR . "empty branch name\n";
 					continue;
 				}
-				git_checkout($branch);
-				git_pull($password);
+				if (!git_checkout($branch)) {
+					exit(1);
+				}
+				if (!git_pull()) {
+					exit(1);
+				}
 			}
 		}
 	}

@@ -19,7 +19,7 @@ function shutdown() {
 	if ($STATE->console->_win_obscureprompt_status === TRUE) {
 		echo "\033[0m";
 		cli_clear_screen();
-	}
+	};
 	exit(0);
 }
 
