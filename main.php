@@ -53,20 +53,24 @@ if ($argv[1] === "pull") {
 			(isset($pull->branches) && !is_array($pull->branches))
 		) {
 			echo ERROR . "invalid pull spec\n";
+			sodium_memzero($password);
 			exit(1);
 		}
 		if (!file_exists($pull->path) || !is_dir($pull->path)) {
 			echo ERROR . "directory not found: " . $pull->path . "\n";
+			sodium_memzero($password);
 			exit(1);
 		}
 		if(!chdir($pull->path)) {
 			echo ERROR . "failed to cd to " . $Pull->path . "\n";
+			sodium_memzero($password);
 			exit(1);
 		}
 		echo "\n" . $pull->path . "\n";
 		if (!isset($pull->branches) || count($pull->branches) < 1) {
 			/* pull branch that is currently checked out */
-			if (!git_pull()) {
+			if (!git_pull($password)) {
+				sodium_memzero($password);
 				exit(1);
 			}
 		} else {
@@ -77,10 +81,12 @@ if ($argv[1] === "pull") {
 					continue;
 				}
 				if (!git_checkout($branch)) {
+					sodium_memzero($password);
 					exit(1);
 				}
 				echo "\n";
-				if (!git_pull()) {
+				if (!git_pull($password)) {
+					sodium_memzero($password);
 					exit(1);
 				}
 				echo "\n";
