@@ -8,6 +8,8 @@ require __DIR__ . "/cli.php";
 
 $argv = $_SERVER["argv"];
 
+$password = "";
+
 /* validate local config file */
 if (!file_exists(LOCAL_CONFIG_FILE)) {
 	if (!file_put_contents(LOCAL_CONFIG_FILE , str_replace("    " , "\t" , json_encode((object) [
@@ -46,6 +48,12 @@ if ($argv[1] === "pull") {
 		echo ERROR . "no paths to pull configured\n";
 		exit(1);
 	}
+	/* ask password */
+	$errormsg = "";
+	if (!cli_prompt_password("password: " , $password , $errormsg)) {
+		echo ERROR . "failed to read password from tty: " . $errormsg . "\n";
+		exit(1);
+	}
 	foreach ($CONFIG->pull as $pull) {
 		if (
 			!is_object($pull) ||
@@ -62,7 +70,7 @@ if ($argv[1] === "pull") {
 			exit(1);
 		}
 		if(!chdir($pull->path)) {
-			echo ERROR . "failed to cd to " . $Pull->path . "\n";
+			echo ERROR . "failed to cd to " . $pull->path . "\n";
 			sodium_memzero($password);
 			exit(1);
 		}
